@@ -1,8 +1,8 @@
-﻿namespace ToDoItemApi.Validators
-{
-    using FluentValidation;
-    using ToDoItemApi.Models.DTO;
+﻿using FluentValidation;
+using ToDoItemApi.Models.DTO;
 
+namespace ToDoItemApi.Validators
+{
     public class ToDoSearchRequestValidator : AbstractValidator<ToDoSearchRequestDto>
     {
         public ToDoSearchRequestValidator()

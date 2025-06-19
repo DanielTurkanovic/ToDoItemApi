@@ -8,6 +8,8 @@ namespace ToDoItemApi.Data
         public ToDoDbContext(DbContextOptions<ToDoDbContext> options) : base(options) { }
 
         public DbSet<ToDoItems> ToDoItems { get; set; }
+        public DbSet<User> Users { get; set; }
+
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

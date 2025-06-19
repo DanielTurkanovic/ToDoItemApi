@@ -12,8 +12,8 @@ using ToDoItemApi.Data;
 namespace ToDoItemApi.Migrations
 {
     [DbContext(typeof(ToDoDbContext))]
-    [Migration("20250530120701_InitialMigrations")]
-    partial class InitialMigrations
+    [Migration("20250619131842_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -55,12 +55,35 @@ namespace ToDoItemApi.Migrations
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime2");
 
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.HasKey("Id");
 
                     b.HasIndex("Title")
                         .IsUnique();
 
                     b.ToTable("ToDoItems");
+                });
+
+            modelBuilder.Entity("ToDoItemApi.Models.Domain.User", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("PasswordHash")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Users");
                 });
 #pragma warning restore 612, 618
         }

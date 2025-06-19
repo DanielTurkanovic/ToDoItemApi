@@ -13,9 +13,10 @@ namespace ToDoItemApi.Repositories
             this.dbContext = dbContext;
         }
 
-        public async Task<ToDoItems> CreateAsync(ToDoItems toDoItems)
+        public async Task<ToDoItems> CreateAsync(ToDoItems toDoItems, string userId)
         {
             toDoItems.CreatedAt = DateTime.UtcNow;
+            toDoItems.UserId = userId;
 
             await dbContext.ToDoItems.AddAsync(toDoItems);
             await dbContext.SaveChangesAsync();
@@ -23,20 +24,22 @@ namespace ToDoItemApi.Repositories
             return toDoItems;
         }
 
-        public async Task<List<ToDoItems>> GetAllAsync()
+        public async Task<List<ToDoItems>> GetAllAsync(string userId)
         {
-            var result = await dbContext.ToDoItems.ToListAsync();
-            return result;
+            return await dbContext.ToDoItems
+                .Where(x => x.UserId == userId)
+                .ToListAsync();
         }
 
-        public async Task<ToDoItems?> GetByIdAsync(int id)
+        public async Task<ToDoItems?> GetByIdAsync(int id, string userId)
         {
-            return await dbContext.ToDoItems.FirstOrDefaultAsync(x => x.Id == id);
+            return await dbContext.ToDoItems
+                .FirstOrDefaultAsync(x => x.Id == id && x.UserId == userId);
         }
 
-        public async Task<List<ToDoItems>> SearchByTitleAndDescriptionAsync(string title, string description)
+        public async Task<List<ToDoItems>> SearchByTitleAndDescriptionAsync(string title, string description, string userId)
         {
-            var query = dbContext.ToDoItems.AsQueryable();
+            var query = dbContext.ToDoItems.Where(x => x.UserId == userId);
 
             if (!string.IsNullOrWhiteSpace(title))
             {
@@ -51,11 +54,11 @@ namespace ToDoItemApi.Repositories
             return await query.ToListAsync();
         }
 
-        public async Task<ToDoItems> UpdateAsync(ToDoItems toDoItem)
+        public async Task<ToDoItems> UpdateAsync(ToDoItems toDoItem, string userId)
         {
             // Find the existing item in the database
             var existingItem = await dbContext.ToDoItems
-                .FirstOrDefaultAsync(x => x.Id == toDoItem.Id);
+                .FirstOrDefaultAsync(x => x.Id == toDoItem.Id && x.UserId == userId);
 
             if (existingItem == null)
             {
@@ -66,20 +69,11 @@ namespace ToDoItemApi.Repositories
             existingItem.Title = toDoItem.Title;
             existingItem.Description = toDoItem.Description;
             existingItem.IsCompleted = toDoItem.IsCompleted;
+
             var date = DateTime.UtcNow;
 
-            // If there has been a change in IsCompleted, set CompletedAt.
-            if (toDoItem.IsCompleted == true)
-            {
-                    existingItem.CompletedAt =  date;
-            }
-            else
-            {
-                existingItem.CompletedAt = null;
-            }
-
-                // Set UpdatedAt
-                existingItem.UpdatedAt = date;
+            existingItem.UpdatedAt = date;
+            existingItem.CompletedAt = toDoItem.IsCompleted == true ? date : null;
 
             // Update entity
             dbContext.Update(existingItem);
@@ -91,9 +85,15 @@ namespace ToDoItemApi.Repositories
         }
 
 
-        public async Task<ToDoItems?> DeleteAsync(int id)
+        public async Task<ToDoItems?> DeleteAsync(int id, string userId)
         {
-            var existingItem = await dbContext.ToDoItems.FirstOrDefaultAsync(x => x.Id == id);
+            var existingItem = await dbContext.ToDoItems.
+                FirstOrDefaultAsync(x => x.Id == id && x.UserId == userId);
+
+            if (existingItem == null) 
+            {
+                return null;
+            }
 
             dbContext.ToDoItems.Remove(existingItem);
             await dbContext.SaveChangesAsync();
@@ -101,10 +101,10 @@ namespace ToDoItemApi.Repositories
             return existingItem;
         }
 
-        public async Task<bool> ExistsByTitleAsync(string title)
+        public async Task<bool> ExistsByTitleAsync(string title, string userId)
         {
             return await dbContext.ToDoItems
-                .AnyAsync(x => x.Title.ToLower() == title.ToLower());
+                .AnyAsync(x => x.Title.ToLower() == title.ToLower() && x.UserId == userId);
         }
     }
 }
