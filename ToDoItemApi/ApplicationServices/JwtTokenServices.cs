@@ -9,34 +9,36 @@ namespace ToDoItemApi.ApplicationServices
 {
     public class JwtTokenService : IJwtTokenService
     {
-        private readonly JwtSettings _jwtSettings;
+        private readonly JwtSettings jwtSettings;
 
         public JwtTokenService(IOptions<JwtSettings> jwtSettings)
         {
-            _jwtSettings = jwtSettings.Value;
+            this.jwtSettings = jwtSettings.Value;
         }
 
-        public string GenerateToken(string userId, string userName)
+        public string GenerateToken(string userId, string email)
         {
-            var claims = new[]
-            {
-               new Claim(JwtRegisteredClaimNames.Sub, userId),
-               new Claim(JwtRegisteredClaimNames.UniqueName, userName),
-               new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
+            var tokenHandler = new JwtSecurityTokenHandler();
+            var key = Encoding.UTF8.GetBytes(jwtSettings.Key);
 
+            var tokenDescriptor = new SecurityTokenDescriptor
+            {
+                Subject = new ClaimsIdentity(new[]
+                {
+                    new Claim(ClaimTypes.NameIdentifier, userId),
+                    new Claim(ClaimTypes.Email, email)
+                }),
+                Expires = DateTime.UtcNow.AddMinutes(jwtSettings.ExpiresInMinutes),
+                Issuer = jwtSettings.Issuer,
+                Audience = jwtSettings.Audience,
+                SigningCredentials = new SigningCredentials(
+                    new SymmetricSecurityKey(key),
+                    SecurityAlgorithms.HmacSha256Signature
+                )
             };
 
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtSettings.Key));
-            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-
-            var token = new JwtSecurityToken(
-                issuer: _jwtSettings.Issuer,
-                audience: _jwtSettings.Audience,
-                claims: claims,
-                expires: DateTime.UtcNow.AddMinutes(_jwtSettings.ExpiresInMinutes),
-                signingCredentials: creds);
-
-            return new JwtSecurityTokenHandler().WriteToken(token);
+            var token = tokenHandler.CreateToken(tokenDescriptor);
+            return tokenHandler.WriteToken(token);
         }
     }
 }

@@ -14,6 +14,7 @@ namespace ToDoItemApi.Models.Domain
         public DateTime? CompletedAt { get; set; }
 
         // FK on User
-        public string UserId { get; set; }
+        public int UserId { get; set; }
+        public User User { get; set; }
     }
 }

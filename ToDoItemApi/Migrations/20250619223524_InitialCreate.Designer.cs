@@ -12,7 +12,7 @@ using ToDoItemApi.Data;
 namespace ToDoItemApi.Migrations
 {
     [DbContext(typeof(ToDoDbContext))]
-    [Migration("20250619131842_InitialCreate")]
+    [Migration("20250619223524_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -55,23 +55,26 @@ namespace ToDoItemApi.Migrations
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("UserId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
 
                     b.HasIndex("Title")
                         .IsUnique();
 
+                    b.HasIndex("UserId");
+
                     b.ToTable("ToDoItems");
                 });
 
             modelBuilder.Entity("ToDoItemApi.Models.Domain.User", b =>
                 {
-                    b.Property<Guid>("Id")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Email")
                         .IsRequired()
@@ -84,6 +87,17 @@ namespace ToDoItemApi.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Users");
+                });
+
+            modelBuilder.Entity("ToDoItemApi.Models.Domain.ToDoItems", b =>
+                {
+                    b.HasOne("ToDoItemApi.Models.Domain.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
                 });
 #pragma warning restore 612, 618
         }

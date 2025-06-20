@@ -26,13 +26,15 @@ namespace ToDoItemApi.Controllers
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] ToDoItemRequestDto request)
         {
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (!int.TryParse(userIdString, out int userId))
+            {
+                return Unauthorized("Invalid user id.");
+            }
 
-            // Map DTO to Daomain Model
             var toDoItem = mapper.Map<ToDoItems>(request);
             toDoItem.UserId = userId;
 
-            // CHECK: does a task with the same title already exist
             var exists = await toDoRepository.ExistsByTitleAsync(toDoItem.Title, userId);
 
             if (exists)
@@ -42,17 +44,14 @@ namespace ToDoItemApi.Controllers
 
             try
             {
-                // Trying to write to the database
                 var createdItem = await toDoRepository.CreateAsync(toDoItem, userId);
-
-                // Map Domain Model to DTO
                 var dto = mapper.Map<ToDoItemDto>(createdItem);
 
                 return CreatedAtAction(nameof(GetById), new { id = dto.Id }, dto);
             }
-            catch (Exception ex) 
+            catch (Exception ex)
             {
-                return BadRequest(ex);
+                return BadRequest(ex.Message);
             }
         }
 
@@ -61,7 +60,12 @@ namespace ToDoItemApi.Controllers
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            if (!int.TryParse(userIdString, out int userId))
+            {
+                return Unauthorized("Invalid user ID.");
+            }
 
             var items = await toDoRepository.GetAllAsync(userId);
 
@@ -75,7 +79,12 @@ namespace ToDoItemApi.Controllers
         [HttpGet("{id:int}")]
         public async Task<IActionResult> GetById([FromRoute] int id)
         {
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            if (!int.TryParse(userIdString, out int userId))
+            {
+                return Unauthorized("Invalid user ID.");
+            }
 
             var item = await toDoRepository.GetByIdAsync(id, userId);
 
@@ -94,7 +103,12 @@ namespace ToDoItemApi.Controllers
         [HttpGet("search")]
         public async Task<IActionResult> SearchByTitleAndDescription([FromQuery] ToDoSearchRequestDto request)
         {
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            if (!int.TryParse(userIdString, out int userId))
+            {
+                return Unauthorized("Invalid user ID.");
+            }
 
             var items = await toDoRepository.SearchByTitleAndDescriptionAsync(
                 request.Title?.Trim().ToLower(),
@@ -119,7 +133,12 @@ namespace ToDoItemApi.Controllers
             if (request == null)
                 return BadRequest("Request body cannot be null");
 
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            if (!int.TryParse(userIdString, out int userId))
+            {
+                return Unauthorized("Invalid user ID.");
+            }
 
             // Map the DTO to ToDoItem and set the ID from the route.
             var toDoItem = mapper.Map<ToDoItems>(request);
@@ -141,7 +160,12 @@ namespace ToDoItemApi.Controllers
         [HttpDelete("{id:int}")]
         public async Task<IActionResult> Delete([FromRoute] int id)
         {
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            if (!int.TryParse(userIdString, out int userId))
+            {
+                return Unauthorized("Invalid user ID.");
+            }
 
             var deletedItem = await toDoRepository.DeleteAsync(id, userId);
 

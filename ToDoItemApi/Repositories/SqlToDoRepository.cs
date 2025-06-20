@@ -13,7 +13,7 @@ namespace ToDoItemApi.Repositories
             this.dbContext = dbContext;
         }
 
-        public async Task<ToDoItems> CreateAsync(ToDoItems toDoItems, string userId)
+        public async Task<ToDoItems> CreateAsync(ToDoItems toDoItems, int userId)
         {
             toDoItems.CreatedAt = DateTime.UtcNow;
             toDoItems.UserId = userId;
@@ -24,20 +24,20 @@ namespace ToDoItemApi.Repositories
             return toDoItems;
         }
 
-        public async Task<List<ToDoItems>> GetAllAsync(string userId)
+        public async Task<List<ToDoItems>> GetAllAsync(int userId)
         {
             return await dbContext.ToDoItems
                 .Where(x => x.UserId == userId)
                 .ToListAsync();
         }
 
-        public async Task<ToDoItems?> GetByIdAsync(int id, string userId)
+        public async Task<ToDoItems?> GetByIdAsync(int id, int userId)
         {
             return await dbContext.ToDoItems
                 .FirstOrDefaultAsync(x => x.Id == id && x.UserId == userId);
         }
 
-        public async Task<List<ToDoItems>> SearchByTitleAndDescriptionAsync(string title, string description, string userId)
+        public async Task<List<ToDoItems>> SearchByTitleAndDescriptionAsync(string title, string description, int userId)
         {
             var query = dbContext.ToDoItems.Where(x => x.UserId == userId);
 
@@ -54,7 +54,7 @@ namespace ToDoItemApi.Repositories
             return await query.ToListAsync();
         }
 
-        public async Task<ToDoItems> UpdateAsync(ToDoItems toDoItem, string userId)
+        public async Task<ToDoItems> UpdateAsync(ToDoItems toDoItem, int userId)
         {
             // Find the existing item in the database
             var existingItem = await dbContext.ToDoItems
@@ -85,7 +85,7 @@ namespace ToDoItemApi.Repositories
         }
 
 
-        public async Task<ToDoItems?> DeleteAsync(int id, string userId)
+        public async Task<ToDoItems?> DeleteAsync(int id, int userId)
         {
             var existingItem = await dbContext.ToDoItems.
                 FirstOrDefaultAsync(x => x.Id == id && x.UserId == userId);
@@ -101,7 +101,7 @@ namespace ToDoItemApi.Repositories
             return existingItem;
         }
 
-        public async Task<bool> ExistsByTitleAsync(string title, string userId)
+        public async Task<bool> ExistsByTitleAsync(string title, int userId)
         {
             return await dbContext.ToDoItems
                 .AnyAsync(x => x.Title.ToLower() == title.ToLower() && x.UserId == userId);
