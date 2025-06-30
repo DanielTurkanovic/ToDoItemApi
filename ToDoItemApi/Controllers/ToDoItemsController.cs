@@ -8,14 +8,15 @@ using Microsoft.AspNetCore.Authorization;
 
 namespace ToDoItemApi.Controllers
 {
-    [Authorize] 
+    [Authorize] // Requires authentication for all endpoints in this controller
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api/[controller]")] // Route: api/ToDoItems
     public class ToDoItemsController : ControllerBase
     {
         private readonly IToDoRepository toDoRepository;
         private readonly IMapper mapper;
-       
+
+        // Constructor injecting repository and mapper
         public ToDoItemsController(IToDoRepository toDoRepository, IMapper mapper)
         {
             this.toDoRepository = toDoRepository;
@@ -23,30 +24,28 @@ namespace ToDoItemApi.Controllers
         }
 
         // POST: api/ToDoItems
+        // Creates a new ToDo item for the authenticated user
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] ToDoItemRequestDto request)
         {
-            var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (!int.TryParse(userIdString, out int userId))
-            {
-                return Unauthorized("Invalid user id.");
-            }
+            if (!TryGetUserId(out int userId))
+                return Unauthorized("Invalid user ID.");
 
             var toDoItem = mapper.Map<ToDoItems>(request);
             toDoItem.UserId = userId;
 
+            // Check if a task with the same title already exists for the user
             var exists = await toDoRepository.ExistsByTitleAsync(toDoItem.Title, userId);
 
             if (exists)
-            {
                 return BadRequest("A task with the same title already exists.");
-            }
 
             try
             {
                 var createdItem = await toDoRepository.CreateAsync(toDoItem, userId);
                 var dto = mapper.Map<ToDoItemDto>(createdItem);
 
+                // Return 201 Created with the location of the new resource
                 return CreatedAtAction(nameof(GetById), new { id = dto.Id }, dto);
             }
             catch (Exception ex)
@@ -55,60 +54,45 @@ namespace ToDoItemApi.Controllers
             }
         }
 
-
         // GET: api/ToDoItems
+        // Returns all ToDo items for the authenticated user
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
-            var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
-
-            if (!int.TryParse(userIdString, out int userId))
-            {
+            if (!TryGetUserId(out int userId))
                 return Unauthorized("Invalid user ID.");
-            }
 
             var items = await toDoRepository.GetAllAsync(userId);
-
             var dtoItems = mapper.Map<List<ToDoItemDto>>(items);
 
             return Ok(dtoItems);
         }
 
-
         // GET: api/ToDoItems/{id}
+        // Returns a specific ToDo item by ID if it belongs to the user
         [HttpGet("{id:int}")]
         public async Task<IActionResult> GetById([FromRoute] int id)
         {
-            var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
-
-            if (!int.TryParse(userIdString, out int userId))
-            {
+            if (!TryGetUserId(out int userId))
                 return Unauthorized("Invalid user ID.");
-            }
 
             var item = await toDoRepository.GetByIdAsync(id, userId);
 
             if (item == null)
-            {
                 return NotFound();
-            }
 
-            // Map Domain Model to DTO
             var dto = mapper.Map<ToDoItemDto>(item);
 
             return Ok(dto);
         }
 
-        // GET: api/ToDoItems/search
+        // GET: api/ToDoItems/search?title=...&description=...
+        // Searches ToDo items by title and/or description (case-insensitive)
         [HttpGet("search")]
         public async Task<IActionResult> SearchByTitleAndDescription([FromQuery] ToDoSearchRequestDto request)
         {
-            var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
-
-            if (!int.TryParse(userIdString, out int userId))
-            {
+            if (!TryGetUserId(out int userId))
                 return Unauthorized("Invalid user ID.");
-            }
 
             var items = await toDoRepository.SearchByTitleAndDescriptionAsync(
                 request.Title?.Trim().ToLower(),
@@ -117,64 +101,60 @@ namespace ToDoItemApi.Controllers
             );
 
             if (items == null || !items.Any())
-            {
                 return NotFound("No matching items found.");
-            }
 
             var dtos = mapper.Map<List<ToDoItemDto>>(items);
 
             return Ok(dtos);
         }
 
-
+        // PUT: api/ToDoItems/{id}
+        // Updates a ToDo item by ID if it belongs to the user
         [HttpPut("{id:int}")]
         public async Task<IActionResult> Update([FromRoute] int id, [FromBody] ToDoItemRequestDto request)
         {
             if (request == null)
                 return BadRequest("Request body cannot be null");
 
-            var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
-
-            if (!int.TryParse(userIdString, out int userId))
-            {
+            if (!TryGetUserId(out int userId))
                 return Unauthorized("Invalid user ID.");
-            }
 
-            // Map the DTO to ToDoItem and set the ID from the route.
             var toDoItem = mapper.Map<ToDoItems>(request);
+            toDoItem.Id = id; // Set ID from route parameter
 
-            // Ensures that we update the correct item.
-            toDoItem.Id = id;
-
-            // Call UpdateAsync (which internally performs all checks and updates)
             var updatedItem = await toDoRepository.UpdateAsync(toDoItem, userId);
 
             if (updatedItem == null)
-                return NotFound($"ToDo item with ID {id} not found, or you don't have promission.");
+                return NotFound($"ToDo item with ID {id} not found or access denied.");
 
-            // Return the updated DTO
             return Ok(mapper.Map<ToDoItemDto>(updatedItem));
         }
 
-
+        // DELETE: api/ToDoItems/{id}
+        // Deletes a ToDo item if it belongs to the user
         [HttpDelete("{id:int}")]
         public async Task<IActionResult> Delete([FromRoute] int id)
         {
-            var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
-
-            if (!int.TryParse(userIdString, out int userId))
-            {
+            if (!TryGetUserId(out int userId))
                 return Unauthorized("Invalid user ID.");
-            }
 
             var deletedItem = await toDoRepository.DeleteAsync(id, userId);
 
             if (deletedItem == null)
-                return NotFound("Item is not found or you don't have permission");
+                return NotFound("Item not found or you don't have permission to delete it.");
 
             var dto = mapper.Map<ToDoItemDto>(deletedItem);
 
             return Ok(dto);
+        }
+
+        // Extracts the user ID from the JWT token claims
+        // Returns true if the user ID was successfully parsed
+        private bool TryGetUserId(out int userId)
+        {
+            userId = 0;
+            var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            return int.TryParse(userIdString, out userId);
         }
     }
 }

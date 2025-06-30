@@ -15,7 +15,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 // -------------------- CONFIG --------------------
 
-// Učitaj JwtSettings iz konfiguracije
+// Load JwtSettings from configuration
 var jwtSettings = builder.Configuration.GetSection("JwtSettings").Get<JwtSettings>();
 builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("JwtSettings"));
 
@@ -51,7 +51,7 @@ builder.Services.AddAuthentication(options =>
     };
 });
 
-builder.Services.AddAuthorization();
+ builder.Services.AddAuthorization();
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
