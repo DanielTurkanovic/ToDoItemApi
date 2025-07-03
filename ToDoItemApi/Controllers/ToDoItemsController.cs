@@ -26,7 +26,7 @@ namespace ToDoItemApi.Controllers
         // POST: api/ToDoItems
         // Creates a new ToDo item for the authenticated user
         [HttpPost]
-        public async Task<IActionResult> Create([FromBody] ToDoItemRequestDto request)
+        public async Task<IActionResult> Create([FromBody] CreateToDoItemRequestDto request)
         {
             if (!TryGetUserId(out int userId))
                 return Unauthorized("Invalid user ID.");
@@ -111,7 +111,7 @@ namespace ToDoItemApi.Controllers
         // PUT: api/ToDoItems/{id}
         // Updates a ToDo item by ID if it belongs to the user
         [HttpPut("{id:int}")]
-        public async Task<IActionResult> Update([FromRoute] int id, [FromBody] ToDoItemRequestDto request)
+        public async Task<IActionResult> Update([FromRoute] int id, [FromBody] UpdateToDoItemRequestDto request)
         {
             if (request == null)
                 return BadRequest("Request body cannot be null");

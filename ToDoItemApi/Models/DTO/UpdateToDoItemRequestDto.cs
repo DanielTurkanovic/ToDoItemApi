@@ -1,6 +1,6 @@
 ﻿namespace ToDoItemApi.Models.DTO
 {
-    public class ToDoItemRequestDto
+    public class UpdateToDoItemRequestDto
     {
         public string Title { get; set; }
         public string? Description { get; set; }

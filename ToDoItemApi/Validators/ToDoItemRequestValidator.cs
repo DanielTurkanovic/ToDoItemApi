@@ -3,7 +3,7 @@ using ToDoItemApi.Models.DTO;
 
 namespace ToDoItemApi.Validators
 {
-    public class ToDoItemRequestValidator : AbstractValidator<ToDoItemRequestDto>
+    public class ToDoItemRequestValidator : AbstractValidator<CreateToDoItemRequestDto>
     {
         public ToDoItemRequestValidator() 
         {

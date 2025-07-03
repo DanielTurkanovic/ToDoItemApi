@@ -22,6 +22,10 @@ namespace ToDoItemApi.Repositories
             toDoItems.UserId = userId;
 
             await dbContext.ToDoItems.AddAsync(toDoItems);
+
+            var date = DateTime.UtcNow;
+            toDoItems.CompletedAt = toDoItems.IsCompleted == true ? date : null;
+
             await dbContext.SaveChangesAsync();
 
             return toDoItems;

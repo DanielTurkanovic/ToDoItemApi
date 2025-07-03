@@ -11,10 +11,10 @@ namespace ToDoItemApi.DataSeed
             using var scope = app.Services.CreateScope();
             var db = scope.ServiceProvider.GetRequiredService<ToDoDbContext>();
 
-            // Primeni migracije ako treba
+            // Apply migrations if needed
             db.Database.Migrate();
 
-            // Ako nema nijednog korisnika, dodaj dva
+            // If there are no users, add two
             if (!db.Users.Any())
             {
                 var users = new List<User>

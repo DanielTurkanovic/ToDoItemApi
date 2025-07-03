@@ -3,13 +3,14 @@ using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
 using System.Text;
 using ToDoItemApi.ApplicationServices;
 using ToDoItemApi.Data;
+using ToDoItemApi.DataSeed;
 using ToDoItemApi.Models.Auth;
 using ToDoItemApi.Repositories;
 using ToDoItemApi.Validators;
-using ToDoItemApi.DataSeed;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -51,8 +52,7 @@ builder.Services.AddAuthentication(options =>
     };
 });
 
- builder.Services.AddAuthorization();
-
+builder.Services.AddAuthorization();
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 
@@ -60,35 +60,41 @@ builder.Services.AddEndpointsApiExplorer();
 
 builder.Services.AddSwaggerGen(options =>
 {
-    options.SwaggerDoc("v1", new() { Title = "ToDo API", Version = "v1" });
-
-    options.AddSecurityDefinition("Bearer", new Microsoft.OpenApi.Models.OpenApiSecurityScheme
+    // Documentation for API version 1
+    options.SwaggerDoc("v1", new OpenApiInfo
     {
-        Description = @"JWT Authorization header. Example: 'Bearer {token}'",
+        Title = "ToDo API",
+        Version = "v1"
+    });
+
+    // We define the JWT Bearer scheme
+    options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    {
+        Description = "JWT Authorization header using the Bearer scheme. Example: 'Bearer {token}'",
         Name = "Authorization",
-        In = Microsoft.OpenApi.Models.ParameterLocation.Header,
-        Type = Microsoft.OpenApi.Models.SecuritySchemeType.ApiKey,
+        In = ParameterLocation.Header,
+        Type = SecuritySchemeType.ApiKey,
         Scheme = "Bearer"
     });
 
-    options.AddSecurityRequirement(new Microsoft.OpenApi.Models.OpenApiSecurityRequirement
+    // This scheme is mandatory for accessing every endpoint (globally)
+    options.AddSecurityRequirement(new OpenApiSecurityRequirement
     {
         {
-            new Microsoft.OpenApi.Models.OpenApiSecurityScheme
+            new OpenApiSecurityScheme
             {
-                Reference = new Microsoft.OpenApi.Models.OpenApiReference
+                Reference = new OpenApiReference
                 {
-                    Type = Microsoft.OpenApi.Models.ReferenceType.SecurityScheme,
+                    Type = ReferenceType.SecurityScheme,
                     Id = "Bearer"
                 },
-                Scheme = "oauth2",
-                Name = "Bearer",
-                In = Microsoft.OpenApi.Models.ParameterLocation.Header,
+                In = ParameterLocation.Header
             },
-            new List<string>()
+            Array.Empty<string>()
         }
     });
 });
+
 
 // -------------------- PIPELINE --------------------
 
@@ -97,8 +103,15 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
-    app.UseSwaggerUI();
+    app.UseSwaggerUI(c =>
+    {
+        c.SwaggerEndpoint("/swagger/v1/swagger.json", "ToDo API v1");
+
+        // Save the token in localStorage so you don't have to enter it every time.
+        c.ConfigObject.AdditionalItems["persistAuthorization"] = true;
+    });
 }
+
 
 app.UseHttpsRedirection();
 
