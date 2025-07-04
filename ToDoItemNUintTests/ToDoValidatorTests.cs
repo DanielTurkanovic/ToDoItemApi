@@ -9,7 +9,7 @@ namespace ToDoItemNUintTests
         public void Validator_Should_Fail_When_Title_Is_Empty()
         {
             var validator = new ToDoItemRequestValidator();
-            var model = new ToDoItemRequestDto
+            var model = new CreateToDoItemRequestDto
             {
                 Title = "",
                 Description = "Some description"
@@ -26,7 +26,7 @@ namespace ToDoItemNUintTests
         public void Validator_Should_Pass_When_Title_Is_Not_Empty()
         {
             var validator = new ToDoItemRequestValidator();
-            var model = new ToDoItemRequestDto
+            var model = new CreateToDoItemRequestDto
             {
                 Title = "Valid Title",
                 Description = "Some description"

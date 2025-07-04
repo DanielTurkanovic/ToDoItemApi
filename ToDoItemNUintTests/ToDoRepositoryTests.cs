@@ -1,9 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using ToDoItemApi.Data;
 using ToDoItemApi.Models.Domain;
-using ToDoItemApi.Models.DTO;
 using ToDoItemApi.Repositories;
-using ToDoItemApi.Validators;
 
 
 namespace ToDoItemNUintTests
