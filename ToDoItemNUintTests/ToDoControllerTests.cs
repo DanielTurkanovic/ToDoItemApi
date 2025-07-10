@@ -33,7 +33,7 @@ namespace ToDoItemNUintTests
 
             // Dummy data
             var userId = 1;
-            var items = new List<ToDoItems> { new ToDoItems { Id = 1, Title = "Test" } };
+            var items = new List<ToDoItem> { new ToDoItem { Id = 1, Title = "Test" } };
 
             mockRepo.Setup(r => r.GetAllAsync(userId)).ReturnsAsync(items);
             mockMapper.Setup(m => m.Map<List<ToDoItemDto>>(items)).Returns(new List<ToDoItemDto>
@@ -70,9 +70,9 @@ namespace ToDoItemNUintTests
             };
 
             var userId = 1;
-            var domainItems = new List<ToDoItems>
+            var domainItems = new List<ToDoItem>
             {
-                new ToDoItems { Id = 1, Title = "Test Task" }
+                new ToDoItem { Id = 1, Title = "Test Task" }
             };
             var dtoItems = new List<ToDoItemDto>
             {

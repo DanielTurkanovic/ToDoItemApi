@@ -22,12 +22,16 @@ namespace ToDoItemApi.DataSeed
                     new User
                     {
                         Email = "admin@example.com",
-                        PasswordHash = BCrypt.Net.BCrypt.HashPassword("Admin123!")
+                        PasswordHash = BCrypt.Net.BCrypt.HashPassword("Admin123!"),
+                        IsAdmin = true,
+                        IsDeleted = false
                     },
                     new User
                     {
                         Email = "user@example.com",
-                        PasswordHash = BCrypt.Net.BCrypt.HashPassword("User123!")
+                        PasswordHash = BCrypt.Net.BCrypt.HashPassword("User123!"),
+                        IsAdmin = false,
+                        IsDeleted = false
                     }
                 };
 

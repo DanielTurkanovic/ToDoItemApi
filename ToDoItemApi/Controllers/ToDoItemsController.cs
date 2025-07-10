@@ -31,7 +31,7 @@ namespace ToDoItemApi.Controllers
             if (!TryGetUserId(out int userId))
                 return Unauthorized("Invalid user ID.");
 
-            var toDoItem = mapper.Map<ToDoItems>(request);
+            var toDoItem = mapper.Map<ToDoItem>(request);
             toDoItem.UserId = userId;
 
             // Check if a task with the same title already exists for the user
@@ -119,7 +119,7 @@ namespace ToDoItemApi.Controllers
             if (!TryGetUserId(out int userId))
                 return Unauthorized("Invalid user ID.");
 
-            var toDoItem = mapper.Map<ToDoItems>(request);
+            var toDoItem = mapper.Map<ToDoItem>(request);
             toDoItem.Id = id; // Set ID from route parameter
 
             var updatedItem = await toDoRepository.UpdateAsync(toDoItem, userId);

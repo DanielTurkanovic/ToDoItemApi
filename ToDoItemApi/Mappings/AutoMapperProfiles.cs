@@ -8,9 +8,9 @@ namespace ToDoItemApi.Mappings
     {
         public AutoMapperProfiles() 
         {
-            CreateMap<ToDoItems, ToDoItemDto>().ReverseMap();
-            CreateMap<CreateToDoItemRequestDto, ToDoItems>();
-            CreateMap<UpdateToDoItemRequestDto, ToDoItems>();
+            CreateMap<ToDoItem, ToDoItemDto>().ReverseMap();
+            CreateMap<CreateToDoItemRequestDto, ToDoItem>();
+            CreateMap<UpdateToDoItemRequestDto, ToDoItem>();
         }
     }
 }

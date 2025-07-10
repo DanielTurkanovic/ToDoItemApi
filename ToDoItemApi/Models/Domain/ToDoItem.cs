@@ -3,7 +3,7 @@
 namespace ToDoItemApi.Models.Domain
 {
     [Index(nameof(Title), IsUnique = true)]
-    public class ToDoItems
+    public class ToDoItem
     {
         public int Id { get; set; }
         public string Title { get; set; }
@@ -12,6 +12,7 @@ namespace ToDoItemApi.Models.Domain
         public DateTime CreatedAt { get; set; }
         public DateTime? UpdatedAt { get; set; }
         public DateTime? CompletedAt { get; set; }
+        public bool IsDeleted { get; set; } = false;
 
         // FK on User
         public int UserId { get; set; }

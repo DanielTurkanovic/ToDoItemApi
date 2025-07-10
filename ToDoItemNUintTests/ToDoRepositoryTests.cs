@@ -28,7 +28,7 @@ namespace ToDoItemNUintTests
         {
             // Arrange
             var userId = 1;
-            var newItem = new ToDoItems
+            var newItem = new ToDoItem
             {
                 Title = "New Task",
                 Description = "Test Description"
@@ -58,9 +58,9 @@ namespace ToDoItemNUintTests
             var otherUserId = 2;
 
             dbContext.ToDoItems.AddRange(
-                new ToDoItems { Title = "User 1 - Clean house", Description = "Cleaning all rooms", UserId = userId },
-                new ToDoItems { Title = "User 1 - Work out", Description = "Leg day", UserId = userId },
-                new ToDoItems { Title = "Other User - Reeding", Description = "Reeding book", UserId = otherUserId }
+                new ToDoItem { Title = "User 1 - Clean house", Description = "Cleaning all rooms", UserId = userId },
+                new ToDoItem { Title = "User 1 - Work out", Description = "Leg day", UserId = userId },
+                new ToDoItem { Title = "Other User - Reeding", Description = "Reeding book", UserId = otherUserId }
             );
             await dbContext.SaveChangesAsync();
 
@@ -92,7 +92,7 @@ namespace ToDoItemNUintTests
         {
             // Arrange
             var userId = 1;
-            var item = new ToDoItems { Title = "Chill out", Description = "Go on the beach", UserId = userId };
+            var item = new ToDoItem { Title = "Chill out", Description = "Go on the beach", UserId = userId };
             dbContext.ToDoItems.Add(item);
             await dbContext.SaveChangesAsync();
 
@@ -131,7 +131,7 @@ namespace ToDoItemNUintTests
             var userId = 1;
             var title = "Learning";
 
-            dbContext.ToDoItems.Add(new ToDoItems
+            dbContext.ToDoItems.Add(new ToDoItem
             {
                 Title = title,
                 Description = "Debugging",  
@@ -156,7 +156,7 @@ namespace ToDoItemNUintTests
             var existingTitle = "Existing Task";
             var missingTitle = "Missing Task";
 
-            dbContext.ToDoItems.Add(new ToDoItems
+            dbContext.ToDoItems.Add(new ToDoItem
             {
                 Title = existingTitle,
                 Description = "Test description",
@@ -178,7 +178,7 @@ namespace ToDoItemNUintTests
         {
             // Arrange
             var userId = 1;
-            var original = new ToDoItems
+            var original = new ToDoItem
             {
                 Title = "Old Title",
                 Description = "Old Desc",
@@ -189,7 +189,7 @@ namespace ToDoItemNUintTests
             dbContext.ToDoItems.Add(original);
             await dbContext.SaveChangesAsync();
 
-            var updated = new ToDoItems
+            var updated = new ToDoItem
             {
                 Id = original.Id,
                 Title = "New Title",
@@ -214,7 +214,7 @@ namespace ToDoItemNUintTests
         {
             // Arrange
             var userId = 1;
-            var item = new ToDoItems { Title = "Task", Description = "To Delete", UserId = userId };
+            var item = new ToDoItem { Title = "Task", Description = "To Delete", UserId = userId };
             dbContext.ToDoItems.Add(item);
             await dbContext.SaveChangesAsync();
 

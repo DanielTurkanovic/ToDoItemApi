@@ -4,14 +4,14 @@ namespace ToDoItemApi.Repositories
 {
     public interface IToDoRepository
     {
-        Task<ToDoItems> CreateAsync(ToDoItems toDoItems, int userId);
-        Task<List<ToDoItems>> GetAllAsync(int userId);
-        Task<ToDoItems?> GetByIdAsync(int id, int userId);
+        Task<ToDoItem> CreateAsync(ToDoItem toDoItems, int userId);
+        Task<List<ToDoItem>> GetAllAsync(int userId);
+        Task<ToDoItem?> GetByIdAsync(int id, int userId);
 
         // This could be IReadOnlyList<ToDoItems?> in case we want strict reading
-        Task<List<ToDoItems?>> SearchByTitleAndDescriptionAsync(string title, string description, int userId);
-        Task <ToDoItems> UpdateAsync(ToDoItems toDoItem, int userId);
-        Task<ToDoItems> DeleteAsync(int id, int userId);
+        Task<List<ToDoItem?>> SearchByTitleAndDescriptionAsync(string title, string description, int userId);
+        Task <ToDoItem> UpdateAsync(ToDoItem toDoItem, int userId);
+        Task<ToDoItem> DeleteAsync(int id, int userId);
         Task<bool> ExistsByTitleAsync(string title, int userId);
 
     }

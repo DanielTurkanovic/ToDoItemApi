@@ -1,5 +1,7 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 using ToDoItemApi.ApplicationServices;
 using ToDoItemApi.Data;
 using ToDoItemApi.Models.Auth;
@@ -60,5 +62,35 @@ namespace ToDoItemApi.Controllers
 
             return Ok(new RegisterResponseDto { Message = "User successfully registered." });
         }
+
+        [HttpDelete("delete-account")]
+        [Authorize]
+        public async Task<IActionResult> DeleteAccount()
+        {
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+
+            if (userIdClaim == null)
+                return Unauthorized(new { Message = "User ID not found in token." });
+
+            if (!int.TryParse(userIdClaim.Value, out int userId))
+                return Unauthorized(new { Message = "Invalid user ID." });
+
+            var user = await dbContext.Users.FirstOrDefaultAsync(u => u.Id == userId);
+
+            if (user == null)
+                return NotFound(new { Message = "User not found." });
+
+            // Prevent admin from deleting own account
+            if (user.IsAdmin)
+                return BadRequest(new { Message = "Admin account cannot be deleted." });
+
+            // Soft delete:
+            user.IsDeleted = true;
+
+            await dbContext.SaveChangesAsync();
+
+            return Ok(new { Message = "User account deleted successfully." });
+        }
+
     }
 }
