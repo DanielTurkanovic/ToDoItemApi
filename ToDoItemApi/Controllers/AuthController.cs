@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using ToDoItemApi.ApplicationServices;
 using ToDoItemApi.Data;
 using ToDoItemApi.Models.Auth;
+using ToDoItemApi.Models.Auth.ToDoItemApi.Models.Auth;
 using ToDoItemApi.Models.Domain;
 
 namespace ToDoItemApi.Controllers
@@ -57,7 +58,7 @@ namespace ToDoItemApi.Controllers
             dbContext.Users.Add(user);
             await dbContext.SaveChangesAsync();
 
-            return Ok(new { Message = "User successfully registered." });
+            return Ok(new RegisterResponseDto { Message = "User successfully registered." });
         }
     }
 }

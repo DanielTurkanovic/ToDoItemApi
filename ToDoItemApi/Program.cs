@@ -12,6 +12,7 @@ using ToDoItemApi.Models.Auth;
 using ToDoItemApi.Repositories;
 using ToDoItemApi.Validators;
 
+
 var builder = WebApplication.CreateBuilder(args);
 
 // -------------------- CONFIG --------------------
@@ -66,6 +67,7 @@ builder.Services.AddSwaggerGen(options =>
         Title = "ToDo API",
         Version = "v1"
     });
+    
 
     // We define the JWT Bearer scheme
     options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
