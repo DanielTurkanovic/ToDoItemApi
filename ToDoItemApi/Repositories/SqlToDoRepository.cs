@@ -95,7 +95,7 @@ namespace ToDoItemApi.Repositories
         public async Task<ToDoItem?> DeleteAsync(int id, int userId)
         {
             var existingItem = await dbContext.ToDoItems
-                .FirstOrDefaultAsync(x => x.Id == id && x.UserId == userId);
+                .FirstOrDefaultAsync(x => x.Id == id && x.UserId == userId && !x.IsDeleted);
 
             if (existingItem == null)
             {

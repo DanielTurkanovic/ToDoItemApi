@@ -87,6 +87,16 @@ namespace ToDoItemApi.Controllers
             // Soft delete:
             user.IsDeleted = true;
 
+            // Soft delete and its ToDoItems
+            var userItems = await dbContext.ToDoItems
+                .Where(t => t.UserId == userId)
+                .ToListAsync();
+
+            foreach (var item in userItems)
+            {
+                item.IsDeleted = true;
+            }
+
             await dbContext.SaveChangesAsync();
 
             return Ok(new { Message = "User account deleted successfully." });
