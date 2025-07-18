@@ -20,16 +20,9 @@ namespace ToDoItemApi.Controllers
 
         // GET: api/admin/deleted-users
         [HttpGet("deleted-users")]
-        [Authorize]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> GetDeletedUsers()
         {
-            var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
-
-            var currentUser = await dbContext.Users.FindAsync(userId);
-
-            if (currentUser == null || !currentUser.IsAdmin)
-                return Forbid("Only admin can access this endpoint.");
-
             var deletedUsers = await dbContext.Users
                 .IgnoreQueryFilters()
                 .Where(u => u.IsDeleted)
@@ -38,15 +31,15 @@ namespace ToDoItemApi.Controllers
             return Ok(deletedUsers);
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpPut("restore-user/{id:int}")]
-        [Authorize]
         public async Task<IActionResult> RestoreUser(int id)
         {
-            var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
-            var currentUser = await dbContext.Users.FindAsync(userId);
+            //var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+            //var currentUser = await dbContext.Users.FindAsync(userId);
 
-            if (currentUser == null || !currentUser.IsAdmin)
-                return StatusCode(403, "Only admin can access this endpoint.");
+            //if (currentUser == null || !currentUser.IsAdmin)
+            //    return StatusCode(403, "Only admin can access this endpoint.");
 
             var deletedUser = await dbContext.Users
                 .FirstOrDefaultAsync(u => u.Id == id && u.IsDeleted);

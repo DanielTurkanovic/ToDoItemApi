@@ -11,7 +11,7 @@ namespace ToDoItemApi.Controllers
     [Authorize] // Requires authentication for all endpoints in this controller
     [ApiController]
     [Route("api/[controller]")] // Route: api/ToDoItems
-    public class ToDoItemsController : ControllerBase
+    public class ToDoItemsController : BaseController
     {
         private readonly IToDoRepository toDoRepository;
         private readonly IMapper mapper;
@@ -40,19 +40,12 @@ namespace ToDoItemApi.Controllers
             if (exists)
                 return BadRequest("A task with the same title already exists.");
 
-            try
-            {
                 var createdItem = await toDoRepository.CreateAsync(toDoItem, userId);
                 var dto = mapper.Map<ToDoItemDto>(createdItem);
 
                 // Return 201 Created with the location of the new resource
                 return CreatedAtAction(nameof(GetById), new { id = dto.Id }, dto);
             }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
-        }
 
         // GET: api/ToDoItems
         // Returns all ToDo items for the authenticated user
@@ -61,11 +54,10 @@ namespace ToDoItemApi.Controllers
         {
             if (!TryGetUserId(out int userId))
                 return Unauthorized("Invalid user ID.");
-
-            var items = await toDoRepository.GetAllAsync(userId);
-            var dtoItems = mapper.Map<List<ToDoItemDto>>(items);
-
-            return Ok(dtoItems);
+           
+                var items = await toDoRepository.GetAllAsync(userId);
+                var dtoItems = mapper.Map<List<ToDoItemDto>>(items);
+                return Ok(dtoItems);
         }
 
         // GET: api/ToDoItems/{id}
@@ -76,14 +68,12 @@ namespace ToDoItemApi.Controllers
             if (!TryGetUserId(out int userId))
                 return Unauthorized("Invalid user ID.");
 
-            var item = await toDoRepository.GetByIdAsync(id, userId);
+                var item = await toDoRepository.GetByIdAsync(id, userId);
+                if (item == null)
+                    return NotFound();
 
-            if (item == null)
-                return NotFound();
-
-            var dto = mapper.Map<ToDoItemDto>(item);
-
-            return Ok(dto);
+                var dto = mapper.Map<ToDoItemDto>(item);
+                return Ok(dto);
         }
 
         // GET: api/ToDoItems/search?title=...&description=...
@@ -93,19 +83,18 @@ namespace ToDoItemApi.Controllers
         {
             if (!TryGetUserId(out int userId))
                 return Unauthorized("Invalid user ID.");
+          
+                var items = await toDoRepository.SearchByTitleAndDescriptionAsync(
+                    request.Title?.Trim().ToLower(),
+                    request.Description?.Trim().ToLower(),
+                    userId
+                );
 
-            var items = await toDoRepository.SearchByTitleAndDescriptionAsync(
-                request.Title?.Trim().ToLower(),
-                request.Description?.Trim().ToLower(),
-                userId
-            );
+                if (items == null || !items.Any())
+                    return NotFound("No matching items found.");
 
-            if (items == null || !items.Any())
-                return NotFound("No matching items found.");
-
-            var dtos = mapper.Map<List<ToDoItemDto>>(items);
-
-            return Ok(dtos);
+                var dtos = mapper.Map<List<ToDoItemDto>>(items);
+                return Ok(dtos);
         }
 
         // PUT: api/ToDoItems/{id}
@@ -118,16 +107,15 @@ namespace ToDoItemApi.Controllers
 
             if (!TryGetUserId(out int userId))
                 return Unauthorized("Invalid user ID.");
+          
+                var toDoItem = mapper.Map<ToDoItem>(request);
+                toDoItem.Id = id; // Set ID from route parameter
 
-            var toDoItem = mapper.Map<ToDoItem>(request);
-            toDoItem.Id = id; // Set ID from route parameter
+                var updatedItem = await toDoRepository.UpdateAsync(toDoItem, userId);
+                if (updatedItem == null)
+                    return NotFound($"ToDo item with ID {id} not found or access denied.");
 
-            var updatedItem = await toDoRepository.UpdateAsync(toDoItem, userId);
-
-            if (updatedItem == null)
-                return NotFound($"ToDo item with ID {id} not found or access denied.");
-
-            return Ok(mapper.Map<ToDoItemDto>(updatedItem));
+                return Ok(mapper.Map<ToDoItemDto>(updatedItem));
         }
 
         // DELETE: api/ToDoItems/{id}
@@ -138,23 +126,19 @@ namespace ToDoItemApi.Controllers
             if (!TryGetUserId(out int userId))
                 return Unauthorized("Invalid user ID.");
 
-            var deletedItem = await toDoRepository.DeleteAsync(id, userId);
+                var deletedItem = await toDoRepository.DeleteAsync(id, userId);
+                if (deletedItem == null)
+                    return NotFound("Item not found or you don't have permission to delete it.");
 
-            if (deletedItem == null)
-                return NotFound("Item not found or you don't have permission to delete it.");
-
-            var dto = mapper.Map<ToDoItemDto>(deletedItem);
-
-            return Ok(dto);
+                var dto = mapper.Map<ToDoItemDto>(deletedItem);
+                return Ok(dto);
         }
-
-        // Extracts the user ID from the JWT token claims
-        // Returns true if the user ID was successfully parsed
-        private bool TryGetUserId(out int userId)
-        {
-            userId = 0;
-            var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            return int.TryParse(userIdString, out userId);
-        }
+        
+        //private bool TryGetUserId(out int userId)
+        //{
+        //    userId = 0;
+        //    var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        //    return int.TryParse(userIdString, out userId);
+        //}
     }
 }

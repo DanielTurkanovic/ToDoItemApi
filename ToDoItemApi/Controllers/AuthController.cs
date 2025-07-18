@@ -12,34 +12,15 @@ namespace ToDoItemApi.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class AuthController : ControllerBase
+    public class AuthController : BaseController
     {
-        private readonly IJwtTokenService jwtTokenService;
         private readonly ToDoDbContext dbContext;
+        private readonly IJwtTokenService jwtTokenService;
 
         public AuthController(ToDoDbContext dbContext, IJwtTokenService jwtTokenService)
         {
             this.dbContext = dbContext;
             this.jwtTokenService = jwtTokenService;
-        }
-
-        [HttpPost("login")]
-        public async Task<IActionResult> Login([FromBody] LoginRequestDto request)
-        {
-            var user = await dbContext.Users.FirstOrDefaultAsync(x => x.Email == request.Email);
-
-            if (user == null || !BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash))
-            {
-                return Unauthorized(new { Message = "Invalid credentials" });
-            }
-
-            var token = jwtTokenService.GenerateToken(user.Id.ToString(), user.Email);
-
-            return Ok(new LoginResponseDto
-            {
-                Token = token,
-                Email = user.Email
-            });
         }
 
         [HttpPost("register")]
@@ -62,17 +43,32 @@ namespace ToDoItemApi.Controllers
 
             return Ok(new RegisterResponseDto { Message = "User successfully registered." });
         }
+        [HttpPost("login")]
+        public async Task<IActionResult> Login([FromBody] LoginRequestDto request)
+        {
+            var user = await dbContext.Users.FirstOrDefaultAsync(x => x.Email == request.Email);
+
+            if (user == null || !BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash))
+            {
+                return Unauthorized(new { Message = "Invalid credentials" });
+            }
+
+            var role = user.IsAdmin ? "Admin" : "User";
+            var token = jwtTokenService.GenerateToken(user.Id.ToString(), user.Email, role);
+
+            return Ok(new LoginResponseDto
+            {
+                Token = token,
+                Email = user.Email
+            });
+        }
+
 
         [HttpDelete("delete-account")]
         [Authorize]
         public async Task<IActionResult> DeleteAccount()
         {
-            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
-
-            if (userIdClaim == null)
-                return Unauthorized(new { Message = "User ID not found in token." });
-
-            if (!int.TryParse(userIdClaim.Value, out int userId))
+            if (!TryGetUserId(out int userId))
                 return Unauthorized(new { Message = "Invalid user ID." });
 
             var user = await dbContext.Users.FirstOrDefaultAsync(u => u.Id == userId);
@@ -80,14 +76,11 @@ namespace ToDoItemApi.Controllers
             if (user == null)
                 return NotFound(new { Message = "User not found." });
 
-            // Prevent admin from deleting own account
             if (user.IsAdmin)
                 return BadRequest(new { Message = "Admin account cannot be deleted." });
 
-            // Soft delete:
             user.IsDeleted = true;
 
-            // Soft delete and its ToDoItems
             var userItems = await dbContext.ToDoItems
                 .Where(t => t.UserId == userId)
                 .ToListAsync();
@@ -101,6 +94,5 @@ namespace ToDoItemApi.Controllers
 
             return Ok(new { Message = "User account deleted successfully." });
         }
-
     }
 }
