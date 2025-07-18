@@ -1,9 +1,11 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 using ToDoItemApi.Data;
 using ToDoItemApi.Models.Domain;
+using ToDoItemApi.Models.DTO;
 
 namespace ToDoItemApi.Controllers
 {
@@ -12,10 +14,12 @@ namespace ToDoItemApi.Controllers
     public class AdminController : ControllerBase
     {
         private readonly ToDoDbContext dbContext;
+        private readonly IMapper mapper;
 
-        public AdminController(ToDoDbContext dbContext)
+        public AdminController(ToDoDbContext dbContext, IMapper mapper)
         {
             this.dbContext = dbContext;
+            this.mapper = mapper;
         }
 
         // GET: api/admin/deleted-users
@@ -28,20 +32,37 @@ namespace ToDoItemApi.Controllers
                 .Where(u => u.IsDeleted)
                 .ToListAsync();
 
-            return Ok(deletedUsers);
+            var deletedUsersDto = mapper.Map<List<UserDto>>(deletedUsers);
+
+            return Ok(deletedUsersDto);
+        }
+
+        [Authorize(Roles = "Admin")]
+        [HttpDelete("delete-user/{id:int}")]
+        public async Task<IActionResult> DeleteUser(int id)
+        {
+            var user = await dbContext.Users
+                .IgnoreQueryFilters()
+                .FirstOrDefaultAsync(u => u.Id == id);
+
+            if (user == null)
+                return NotFound("User not found.");
+
+            if (user.IsDeleted)
+                return BadRequest("User is already deleted.");
+
+            user.IsDeleted = true;
+            await dbContext.SaveChangesAsync();
+
+            return Ok(new { Message = "User has been soft-deleted." });
         }
 
         [Authorize(Roles = "Admin")]
         [HttpPut("restore-user/{id:int}")]
         public async Task<IActionResult> RestoreUser(int id)
         {
-            //var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
-            //var currentUser = await dbContext.Users.FindAsync(userId);
-
-            //if (currentUser == null || !currentUser.IsAdmin)
-            //    return StatusCode(403, "Only admin can access this endpoint.");
-
             var deletedUser = await dbContext.Users
+                .IgnoreQueryFilters()
                 .FirstOrDefaultAsync(u => u.Id == id && u.IsDeleted);
 
             if (deletedUser == null)

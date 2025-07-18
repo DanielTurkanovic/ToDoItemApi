@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using ToDoItemApi.Data;
 
@@ -11,9 +12,11 @@ using ToDoItemApi.Data;
 namespace ToDoItemApi.Migrations
 {
     [DbContext(typeof(ToDoDbContext))]
-    partial class ToDoDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250718114946_UpdateUniqueConstraintOnToDoItem")]
+    partial class UpdateUniqueConstraintOnToDoItem
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -60,8 +63,10 @@ namespace ToDoItemApi.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("UserId", "Title")
+                    b.HasIndex("Title")
                         .IsUnique();
+
+                    b.HasIndex("UserId");
 
                     b.ToTable("ToDoItems");
                 });

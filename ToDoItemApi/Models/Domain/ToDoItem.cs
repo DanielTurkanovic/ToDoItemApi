@@ -2,7 +2,7 @@
 
 namespace ToDoItemApi.Models.Domain
 {
-    [Index(nameof(Title), IsUnique = true)]
+    [Index(nameof(UserId), nameof(Title), IsUnique = true)]
     public class ToDoItem
     {
         public int Id { get; set; }

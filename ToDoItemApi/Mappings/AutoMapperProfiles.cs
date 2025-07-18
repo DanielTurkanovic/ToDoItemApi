@@ -11,6 +11,7 @@ namespace ToDoItemApi.Mappings
             CreateMap<ToDoItem, ToDoItemDto>().ReverseMap();
             CreateMap<CreateToDoItemRequestDto, ToDoItem>();
             CreateMap<UpdateToDoItemRequestDto, ToDoItem>();
+            CreateMap<User, UserDto>();
         }
     }
 }

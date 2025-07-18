@@ -28,6 +28,7 @@ builder.Services.AddDbContext<ToDoDbContext>(options =>
 
 builder.Services.AddScoped<IJwtTokenService, JwtTokenService>();
 builder.Services.AddScoped<IToDoRepository, SqlToDoRepository>();
+builder.Services.AddScoped<IUserRepository, SqlUserRepository>();
 
 builder.Services.AddAutoMapper(typeof(Program));
 
