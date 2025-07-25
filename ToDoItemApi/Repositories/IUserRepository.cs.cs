@@ -6,5 +6,7 @@ namespace ToDoItemApi.Repositories
     {
         Task<User?> GetByIdAsync(int id, bool includeDeleted = false);
         Task<bool> RestoreUserAsync(int id);
+        Task<List<User>> GetDeletedUsersAsync();
+        Task<bool> SoftDeleteUserAsync(int id);
     }
 }

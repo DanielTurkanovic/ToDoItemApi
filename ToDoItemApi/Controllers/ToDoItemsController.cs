@@ -133,12 +133,5 @@ namespace ToDoItemApi.Controllers
                 var dto = mapper.Map<ToDoItemDto>(deletedItem);
                 return Ok(dto);
         }
-        
-        //private bool TryGetUserId(out int userId)
-        //{
-        //    userId = 0;
-        //    var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        //    return int.TryParse(userIdString, out userId);
-        //}
     }
 }

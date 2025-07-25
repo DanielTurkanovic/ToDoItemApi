@@ -43,6 +43,7 @@ namespace ToDoItemApi.Controllers
 
             return Ok(new RegisterResponseDto { Message = "User successfully registered." });
         }
+
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginRequestDto request)
         {
@@ -62,7 +63,6 @@ namespace ToDoItemApi.Controllers
                 Email = user.Email
             });
         }
-
 
         [HttpDelete("delete-account")]
         [Authorize]

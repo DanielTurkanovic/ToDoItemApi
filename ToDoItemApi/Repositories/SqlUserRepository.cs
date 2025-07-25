@@ -33,5 +33,25 @@ namespace ToDoItemApi.Repositories
             await dbContext.SaveChangesAsync();
             return true;
         }
+
+        public async Task<List<User>> GetDeletedUsersAsync()
+        {
+            return await dbContext.Users
+                .IgnoreQueryFilters()
+                .Where(u => u.IsDeleted)
+                .ToListAsync();
+        }
+
+        public async Task<bool> SoftDeleteUserAsync(int id)
+        {
+            var user = await GetByIdAsync(id, includeDeleted: true);
+
+            if (user == null || user.IsDeleted)
+                return false;
+
+            user.IsDeleted = true;
+            await dbContext.SaveChangesAsync();
+            return true;
+        }
     }
 }
