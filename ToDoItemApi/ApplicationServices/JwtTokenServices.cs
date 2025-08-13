@@ -1,6 +1,5 @@
 ﻿using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
-using System.Data;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
@@ -10,9 +9,9 @@ namespace ToDoItemApi.ApplicationServices
 {
     public class JwtTokenService : IJwtTokenService
     {
-        private readonly JwtSettings jwtSettings;
+        private readonly JwtSettingsDto jwtSettings;
 
-        public JwtTokenService(IOptions<JwtSettings> jwtSettings)
+        public JwtTokenService(IOptions<JwtSettingsDto> jwtSettings)
         {
             this.jwtSettings = jwtSettings.Value;
         }

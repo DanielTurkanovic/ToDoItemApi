@@ -26,9 +26,6 @@ namespace ToDoItemApi.Controllers
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] RegisterRequestDto request)
         {
-            if (string.IsNullOrWhiteSpace(request.Email) || string.IsNullOrWhiteSpace(request.Password))
-                return BadRequest(new { Message = "Email and password are required." });
-
             if (await dbContext.Users.AnyAsync(x => x.Email == request.Email))
                 return Conflict(new { Message = "User with this email already exists." });
 

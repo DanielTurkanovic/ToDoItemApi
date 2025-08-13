@@ -18,8 +18,8 @@ var builder = WebApplication.CreateBuilder(args);
 // -------------------- CONFIG --------------------
 
 // Load JwtSettings from configuration
-var jwtSettings = builder.Configuration.GetSection("JwtSettings").Get<JwtSettings>();
-builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("JwtSettings"));
+var jwtSettings = builder.Configuration.GetSection("JwtSettings").Get<JwtSettingsDto>();
+builder.Services.Configure<JwtSettingsDto>(builder.Configuration.GetSection("JwtSettings"));
 
 // -------------------- SERVICES --------------------
 

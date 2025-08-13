@@ -1,6 +1,6 @@
 ﻿namespace ToDoItemApi.Models.Auth
 {
-    public class JwtSettings
+    public class JwtSettingsDto 
     {
         public string Key { get; set; }
         public string Issuer { get; set; }
