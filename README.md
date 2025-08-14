@@ -13,6 +13,9 @@
   <li>Authorization using bearer token</li>
   <li>CRUD operations for ToDo items</li>
   <li>Search by title and description</li>
+  <li>User account management:</li>
+      Users can soft-delete (deactivate) their own account</br>
+      Admins can soft-delete any account and restore deleted accounts</li>
   <li>AutoMapper for DTO mapping</li>
   <li>EF Core with SQL Server</li>
   <li>Repository Pattern used</li>
@@ -77,7 +80,6 @@ cd ToDoItemApi</code></pre>
 <h2>6. Future Improvements</h2>
 <ul>
   <li>Email verification on registration</li>
-  <li>Allow users to delete their account</li>
   <li>Pagination and sorting</li>
   <li>Refresh tokens</li>
 </ul>
