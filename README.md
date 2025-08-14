@@ -72,6 +72,7 @@ cd ToDoItemApi</code></pre>
 <ul>
   <li>Only authenticated users can access ToDo endpoints</li>
   <li>Each user sees only <strong>their own</strong> tasks</li>
+  <li>Only admins can view, soft-delete, or restore user accounts</li>
   <li>The app <strong>seeds users</strong> in the database automatically (see <code>DbSeeder</code>)</li>
   <li>JWT tokens are used to secure all protected routes</li>
 </ul>
